@@ -1,0 +1,95 @@
+---
+title: "API Practice"
+format: html
+editor: visual
+
+execute: 
+  warning: false
+---
+
+```{r}
+library(dataRetrieval)
+library(tidyverse)
+```
+
+## Sample Code
+
+```{r}
+# siteNumber <- "01491000"
+# parameterCd <- "00060" # Discharge
+# startDate <- "2009-10-01"
+# endDate <- "2012-09-30"
+# 
+# discharge <- readNWISdv(siteNumber, parameterCd, startDate, endDate)
+```
+
+## My code
+
+-   Using `dataRetrieval` get the the discharge (ft³/s) time-series for the Ventura River (site `11118500`) during the recent Hilary tropical storm from 2023-08-19 to 2023-08-22
+
+```{r}
+siteNumber <- "11118500"
+parameterCd <- "00060"
+startDate <- "2023-08-19"
+endDate <- "2023-08-22"
+
+discharge <- readNWISdv(siteNumber, parameterCd, startDate, endDate)
+```
+
+-   Plot the time-series usgin `ggplot2`
+
+```{r}
+ggplot(data = discharge, aes(x = Date, y = X_00060_00003))+
+  geom_col(fill = "blue")+
+  labs(title = "Stream Gauge Data for Ventura")+
+  xlab("Sample Date")+
+  ylab("discharge (ft³/s)")
+```
+
+Maximum value for the site = 35.6ft\^3/s
+
+Start date for the data found in documentation: 1908-11-05
+
+```{r}
+siteNumber2 <- "11118500"
+parameterCd2 <- "00060"
+startDate2 <- "2023-01-08"
+endDate2 <- "2023-01-09"
+
+discharge2 <- readNWISdv(siteNumber2, parameterCd2, startDate2, endDate2)
+
+ggplot(data = discharge2, aes(x = Date, y = X_00060_00003))+
+  geom_point(color = "pink")+
+  labs(title = "Stream Gauge Data for Ventura")+
+  xlab("Sample Date")+
+  ylab("discharge (ft³/s)")
+```
+
+## Exercise 2
+
+```{r}
+library(metajam)
+```
+
+```{r}
+data_obj <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3A7fc6f6db-c5ea-426a-a743-1f2edafb43b8"
+path <- "."
+
+#metajam::download_d1_data(data_obj,path)
+ak_household_data <- metajam::read_d1_files("doi_10.5063_F1N58JPP__household_language__csv/")
+```
+
+```{r}
+data <- ak_household_data$data
+# view(data)
+
+new_data <- data %>%
+  filter(Year %in% c("2009":"2015")) %>%
+  mutate(English_pct = (speak_only_english/total),
+         French_pct = (french_or_french_creole/total)) %>%
+  group_by(Year) %>%
+  summarize(mean_english_pct = mean(English_pct, na.rm = TRUE),
+            french_or_french_creole)
+         
+        
+```
